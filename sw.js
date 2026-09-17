@@ -2,18 +2,18 @@
    服装设计素材库 · Service Worker
    ============================================ */
 
-const CACHE_NAME = 'fashion-material-v2';
+const CACHE_NAME = 'fashion-material-v3';
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/css/main.css',
-  '/css/variables.css',
-  '/js/db.js',
-  '/js/app.js',
-  '/js/canvas.js',
-  '/lib/fabric.min.js',
-  '/manifest.json',
-  '/assets/icons/icon.svg',
+  './',
+  './index.html',
+  './css/main.css',
+  './css/variables.css',
+  './js/db.js',
+  './js/app.js',
+  './js/canvas.js',
+  './lib/fabric.min.js',
+  './manifest.json',
+  './assets/icons/icon.svg',
 ];
 
 // 安装：缓存静态资源
@@ -52,7 +52,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           return response;
         })
-        .catch(() => caches.match('/index.html'))
+        .catch(() => caches.match('./index.html'))
     );
     return;
   }

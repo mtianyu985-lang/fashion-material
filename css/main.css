@@ -1,10 +1,10 @@
 /* ============================================
-   服装设计素材库 · 主样式
+   鏈嶈璁捐绱犳潗搴?路 涓绘牱寮?
    ============================================ */
 
 @import url('./variables.css');
 
-/* 重置 */
+/* 閲嶇疆 */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -26,7 +26,7 @@ body {
   overflow-x: hidden;
 }
 
-/* 标题用衬线体 */
+/* 鏍囬鐢ㄨ‖绾夸綋 */
 h1, h2, h3 {
   font-family: var(--font-serif);
   font-weight: 600;
@@ -182,7 +182,7 @@ img {
 }
 
 /* ============================================
-   Masonry / 瀑布流
+   Masonry / 鐎戝竷娴?
    ============================================ */
 .masonry {
   column-count: 2;
@@ -438,7 +438,7 @@ img {
 }
 
 /* ============================================
-   Modal / 弹窗
+   Modal / 寮圭獥
    ============================================ */
 .modal-overlay {
   position: fixed;
@@ -680,12 +680,7 @@ img {
   .masonry {
     column-count: 3;
   }
-  
-  .bottom-bar {
-    display: none;
-  }
-  
-  .main {
+.main {
     padding-bottom: var(--space-xl);
   }
 }
@@ -700,13 +695,13 @@ img {
 }
 
 
-/* 移动端：始终显示操作按钮 */
+/* 绉诲姩绔細濮嬬粓鏄剧ず鎿嶄綔鎸夐挳 */
 @media (max-width: 768px) {
   .masonry__actions {
     opacity: 1;
   }
 }
-/* ========== Lightbox 图片查看器 ========== */
+/* ========== Lightbox 鍥剧墖鏌ョ湅鍣?========== */
 .lightbox {
   position: relative;
   max-width: 95vw;
@@ -794,7 +789,7 @@ img {
 }
 
 
-/* ========== 回收站批量操作 ========== */
+/* ========== 鍥炴敹绔欐壒閲忔搷浣?========== */
 .trash-toolbar {
   display: flex;
   align-items: center;
@@ -852,7 +847,7 @@ img {
   outline-offset: -2px;
 }
 
-/* ========== 回收站倒计时 ========== */
+/* ========== 鍥炴敹绔欏€掕鏃?========== */
 .trash-countdown {
   font-size: 0.75rem;
   margin-top: 4px;
@@ -868,7 +863,7 @@ img {
   font-weight: 500;
 }
 
-/* ========== 收藏按钮 ========== */
+/* ========== 鏀惰棌鎸夐挳 ========== */
 .masonry__fav {
   width: 28px;
   height: 28px;
@@ -895,13 +890,13 @@ img {
   color: #333;
 }
 
-/* ========== 顶部收藏按钮 ========== */
+/* ========== 椤堕儴鏀惰棌鎸夐挳 ========== */
 .header__btn--fav {
   font-size: 1.1rem;
   letter-spacing: -2px;
 }
 
-/* ========== 排序/分页工具栏 ========== */
+/* ========== 鎺掑簭/鍒嗛〉宸ュ叿鏍?========== */
 .sort-bar {
   display: flex;
   align-items: center;
@@ -934,7 +929,7 @@ img {
   border-color: var(--text-primary);
 }
 
-/* ========== 加载更多 ========== */
+/* ========== 鍔犺浇鏇村 ========== */
 .load-more {
   text-align: center;
   padding: 20px;
@@ -962,7 +957,7 @@ img {
   to { transform: rotate(360deg); }
 }
 
-/* ========== 分页导航 ========== */
+/* ========== 鍒嗛〉瀵艰埅 ========== */
 .pagination {
   display: flex;
   align-items: center;
@@ -1000,7 +995,7 @@ img {
   text-align: center;
 }
 
-/* ========== 分类管理按钮 ========== */
+/* ========== 鍒嗙被绠＄悊鎸夐挳 ========== */
 .category-item__actions {
   display: flex;
   gap: 4px;
@@ -1039,7 +1034,7 @@ img {
   border-color: #e74c3c;
 }
 
-/* ========== 全部分类面板 ========== */
+/* ========== 鍏ㄩ儴鍒嗙被闈㈡澘 ========== */
 .filter-tab--more {
   flex-shrink: 0;
   padding: var(--space-sm) var(--space-md);
