@@ -195,7 +195,7 @@ async function initFabricCanvas(asset) {
       canvas.setActiveObject(text);
       text.enterEditing();
       canvasState.isDrawing = false;
-      setCanvasTool('pencil');
+      setCanvasTool('select');
       return;
     }
     
