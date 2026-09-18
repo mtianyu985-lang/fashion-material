@@ -6,7 +6,7 @@
 const canvasState = {
   fabricCanvas: null,
   currentAssetId: null,
-  currentTool: 'pencil',
+  currentTool: 'select',
   currentColor: '#2B2B2B',
   brushSize: 3,
   isDrawing: false,
@@ -448,4 +448,62 @@ function rgbToHex(rgb) {
   const match = rgb.match(/\d+/g);
   if (!match) return rgb;
   return '#' + match.slice(0, 3).map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
+}
+
+
+// ========== 画布缩放功能 ==========
+function initCanvasZoom(canvas, container) {
+  let lastDist = 0;
+  let isPanning = false;
+  let lastPosX = 0;
+  let lastPosY = 0;
+
+  // 双指捏合缩放（触屏）
+  container.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      lastDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+    }
+  }, { passive: false });
+
+  container.addEventListener('touchmove', function(e) {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const scale = dist / lastDist;
+      let zoom = canvas.getZoom() * scale;
+      zoom = Math.max(0.5, Math.min(5, zoom));
+      const center = {
+        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+        y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+      };
+      canvas.zoomToPoint(new fabric.Point(center.x, center.y), zoom);
+      lastDist = dist;
+      canvas.renderAll();
+    }
+  }, { passive: false });
+
+  // 鼠标滚轮缩放（电脑端）
+  container.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    const delta = e.deltaY;
+    let zoom = canvas.getZoom();
+    zoom *= 0.999 ** delta;
+    zoom = Math.max(0.5, Math.min(5, zoom));
+    canvas.zoomToPoint(new fabric.Point(e.offsetX, e.offsetY), zoom);
+    canvas.renderAll();
+  }, { passive: false });
+
+  // 双击重置缩放
+  container.addEventListener('dblclick', function() {
+    canvas.setZoom(1);
+    canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+    canvas.renderAll();
+  });
 }

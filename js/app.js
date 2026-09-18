@@ -9,8 +9,8 @@ function esc(s) {
   );
 }
 
-// ========== 属性选项 ==========
-const ATTRIBUTE_OPTIONS = {
+// ========== 属性选项（可自定义） ==========
+const DEFAULT_ATTRIBUTE_OPTIONS = {
   style: [
     { value: '优雅', label: '优雅' }, { value: '简约', label: '简约' },
     { value: '复古', label: '复古' }, { value: '街头', label: '街头' },
@@ -27,6 +27,7 @@ const ATTRIBUTE_OPTIONS = {
     { value: '秀场', label: '秀场' },
   ],
 };
+let ATTRIBUTE_OPTIONS = JSON.parse(JSON.stringify(DEFAULT_ATTRIBUTE_OPTIONS));
 
 // ========== 全局状态 ==========
 const state = {
@@ -117,6 +118,10 @@ async function init() {
 
     const cleaned = await db.cleanupExpiredTrash();
     if (cleaned > 0) console.log(`🗑️ 已自动清理 ${cleaned} 个过期素材`);
+
+    // 加载自定义属性选项
+    const savedAttr = await db.getMeta('attributeOptions');
+    if (savedAttr) ATTRIBUTE_OPTIONS = savedAttr;
 
     state.categories = await db.getAllCategories();
     console.log('分类数量:', state.categories.length);
@@ -261,7 +266,11 @@ function getActiveFilterCount() {
 
 function renderFilterPanel() {
   const searchBar = document.getElementById('search-bar');
+  // 先移除旧面板，避免重复渲染
+  const existPanel = document.getElementById('filter-panel');
+  if (existPanel) existPanel.remove();
   const panel = document.createElement('div');
+  panel.id = 'filter-panel';
   panel.style.cssText = 'padding:16px;background:var(--bg-card);border-bottom:1px solid var(--border);';
 
   const allTags = new Set();
@@ -422,11 +431,8 @@ function getFilteredAssets() {
     filtered = filtered.filter(a => state.selectedTags.every(tag => a.tags?.includes(tag)));
   }
 
-  // 收藏置顶 + 时间排序
+  // 仅按时间排序，收藏不改变素材库原有排序
   filtered.sort((a, b) => {
-    const aFav = state.favoriteIds.has(a.id) ? 0 : 1;
-    const bFav = state.favoriteIds.has(b.id) ? 0 : 1;
-    if (aFav !== bFav) return aFav - bFav;
     const aTime = new Date(a.createdAt).getTime();
     const bTime = new Date(b.createdAt).getTime();
     return state.sortOrder === 'newest' ? bTime - aTime : aTime - bTime;
@@ -1587,3 +1593,99 @@ function bindEvents() {
 
 // ========== 启动 ==========
 document.addEventListener('DOMContentLoaded', init);
+
+
+// ========== 属性类别管理 ==========
+function openAttrManager() {
+  const overlay = document.getElementById('modal-overlay');
+  const dims = [
+    { key: 'style', name: '风格' },
+    { key: 'season', name: '季节' },
+    { key: 'purpose', name: '用途' },
+  ];
+
+  overlay.innerHTML = `
+    <div class="modal" style="max-height:80vh;overflow-y:auto;">
+      <div class="modal__header">
+        <h3 class="modal__title">🏷️ 属性类别管理</h3>
+        <button class="modal__close" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal__body">
+        ${dims.map(dim => `
+          <div style="margin-bottom:16px;">
+            <div style="font-size:0.875rem;font-weight:600;margin-bottom:8px;">${dim.name}</div>
+            <div id="attr-list-${dim.key}">
+              ${ATTRIBUTE_OPTIONS[dim.key].map((opt, idx) => `
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;padding:6px 8px;background:var(--bg-primary);border-radius:var(--radius);">
+                  <span style="flex:1;font-size:0.8125rem;">${opt.label}</span>
+                  <button class="category-item__btn" onclick="moveAttr('${dim.key}',${idx},-1)" ${idx===0?'disabled':''}>↑</button>
+                  <button class="category-item__btn" onclick="moveAttr('${dim.key}',${idx},1)" ${idx===ATTRIBUTE_OPTIONS[dim.key].length-1?'disabled':''}>↓</button>
+                  <button class="category-item__btn" onclick="renameAttr('${dim.key}',${idx})">✏️</button>
+                  <button class="category-item__btn category-item__btn--danger" onclick="deleteAttr('${dim.key}',${idx})">×</button>
+                </div>
+              `).join('')}
+            </div>
+            <div style="display:flex;gap:6px;margin-top:6px;">
+              <input type="text" id="new-attr-${dim.key}" placeholder="新增${dim.name}类别" style="flex:1;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);font-size:0.8125rem;">
+              <button class="btn btn--secondary" style="font-size:0.75rem;padding:4px 10px;" onclick="addAttr('${dim.key}')">添加</button>
+            </div>
+          </div>
+        `).join('')}
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <button class="btn btn--secondary" style="flex:1;" onclick="resetAttrOptions()">恢复默认</button>
+          <button class="btn btn--primary" style="flex:1;" onclick="saveAttrOptions(); closeModal(); showToast('属性类别已保存');">保存</button>
+        </div>
+      </div>
+    </div>
+  `;
+  overlay.classList.add('open');
+  overlay.style.display = 'flex';
+}
+
+function addAttr(dim) {
+  const input = document.getElementById('new-attr-' + dim);
+  const name = input.value.trim();
+  if (!name) return;
+  if (ATTRIBUTE_OPTIONS[dim].some(o => o.value === name)) {
+    showToast('已存在同名类别');
+    return;
+  }
+  ATTRIBUTE_OPTIONS[dim].push({ value: name, label: name });
+  input.value = '';
+  openAttrManager();
+}
+
+function moveAttr(dim, idx, dir) {
+  const arr = ATTRIBUTE_OPTIONS[dim];
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= arr.length) return;
+  [arr[idx], arr[newIdx]] = [arr[newIdx], arr[idx]];
+  openAttrManager();
+}
+
+function renameAttr(dim, idx) {
+  const oldName = ATTRIBUTE_OPTIONS[dim][idx].label;
+  const newName = prompt('重命名类别', oldName);
+  if (!newName || newName.trim() === oldName) return;
+  ATTRIBUTE_OPTIONS[dim][idx].value = newName.trim();
+  ATTRIBUTE_OPTIONS[dim][idx].label = newName.trim();
+  openAttrManager();
+}
+
+function deleteAttr(dim, idx) {
+  if (!confirm('确定删除「' + ATTRIBUTE_OPTIONS[dim][idx].label + '」？')) return;
+  ATTRIBUTE_OPTIONS[dim].splice(idx, 1);
+  openAttrManager();
+}
+
+async function resetAttrOptions() {
+  ATTRIBUTE_OPTIONS = JSON.parse(JSON.stringify(DEFAULT_ATTRIBUTE_OPTIONS));
+  await db.setMeta('attributeOptions', ATTRIBUTE_OPTIONS);
+  openAttrManager();
+  showToast('已恢复默认属性类别');
+}
+
+async function saveAttrOptions() {
+  await db.setMeta('attributeOptions', ATTRIBUTE_OPTIONS);
+  renderFilterTabs();
+}
