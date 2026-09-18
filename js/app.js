@@ -279,7 +279,10 @@ function renderFilterPanel() {
   panel.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
       <span style="font-size:0.8125rem;font-weight:500;">属性筛选</span>
-      <button onclick="clearAllFilters()" style="font-size:0.75rem;color:var(--accent);background:none;border:none;cursor:pointer;">清除全部</button>
+      <div style="display:flex;gap:8px;">
+        <button onclick="clearAllFilters()" style="font-size:0.75rem;color:var(--accent);background:none;border:none;cursor:pointer;">清除全部</button>
+        <button onclick="toggleFilterPanel()" style="font-size:0.75rem;color:var(--text-secondary);background:none;border:none;cursor:pointer;">收起 ▲</button>
+      </div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
       ${ATTRIBUTE_OPTIONS.style.map(opt => `
