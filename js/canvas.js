@@ -318,6 +318,11 @@ function setCanvasTool(tool) {
       canvas.freeDrawingBrush.width = canvasState.brushSize * 3;
       canvas.selection = false;
       break;
+    case 'select':
+      canvas.isDrawingMode = false;
+      canvas.selection = true;
+      canvas.discardActiveObject();
+      break;
     case 'line':
     case 'arrow':
     case 'rect':

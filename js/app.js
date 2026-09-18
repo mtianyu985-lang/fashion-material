@@ -38,7 +38,7 @@ const state = {
   assets: [],
   categories: [],
   eventsBound: false,
-  filters: { style: '', season: '', purpose: '' },
+  filters: { style: [], season: [], purpose: [] },
   selectedTags: [],
   showFilterPanel: false,
   favoriteIds: new Set(),
@@ -257,9 +257,9 @@ function toggleFilterPanel() {
 
 function getActiveFilterCount() {
   let count = 0;
-  if (state.filters.style) count++;
-  if (state.filters.season) count++;
-  if (state.filters.purpose) count++;
+  count += state.filters.style.length;
+  count += state.filters.season.length;
+  count += state.filters.purpose.length;
   count += state.selectedTags.length;
   return count;
 }
@@ -287,7 +287,7 @@ function renderFilterPanel() {
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
       ${ATTRIBUTE_OPTIONS.style.map(opt => `
         <button onclick="toggleFilter('style','${opt.value}')"
-                style="padding:4px 12px;font-size:0.8125rem;border:1px solid ${state.filters.style === opt.value ? 'var(--accent)' : 'var(--border)'};border-radius:16px;background:${state.filters.style === opt.value ? 'var(--accent)' : 'transparent'};color:${state.filters.style === opt.value ? 'white' : 'var(--text-secondary)'};cursor:pointer;">
+                style="padding:4px 12px;font-size:0.8125rem;border:1px solid ${state.filters.style.includes(opt.value) ? 'var(--accent)' : 'var(--border)'};border-radius:16px;background:${state.filters.style.includes(opt.value) ? 'var(--accent)' : 'transparent'};color:${state.filters.style.includes(opt.value) ? 'white' : 'var(--text-secondary)'};cursor:pointer;">
           ${opt.label}
         </button>
       `).join('')}
@@ -295,7 +295,7 @@ function renderFilterPanel() {
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
       ${ATTRIBUTE_OPTIONS.season.map(opt => `
         <button onclick="toggleFilter('season','${opt.value}')"
-                style="padding:4px 12px;font-size:0.8125rem;border:1px solid ${state.filters.season === opt.value ? 'var(--accent)' : 'var(--border)'};border-radius:16px;background:${state.filters.season === opt.value ? 'var(--accent)' : 'transparent'};color:${state.filters.season === opt.value ? 'white' : 'var(--text-secondary)'};cursor:pointer;">
+                style="padding:4px 12px;font-size:0.8125rem;border:1px solid ${state.filters.season.includes(opt.value) ? 'var(--accent)' : 'var(--border)'};border-radius:16px;background:${state.filters.season.includes(opt.value) ? 'var(--accent)' : 'transparent'};color:${state.filters.season.includes(opt.value) ? 'white' : 'var(--text-secondary)'};cursor:pointer;">
           ${opt.label}
         </button>
       `).join('')}
@@ -303,7 +303,7 @@ function renderFilterPanel() {
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
       ${ATTRIBUTE_OPTIONS.purpose.map(opt => `
         <button onclick="toggleFilter('purpose','${opt.value}')"
-                style="padding:4px 12px;font-size:0.8125rem;border:1px solid ${state.filters.purpose === opt.value ? 'var(--accent)' : 'var(--border)'};border-radius:16px;background:${state.filters.purpose === opt.value ? 'var(--accent)' : 'transparent'};color:${state.filters.purpose === opt.value ? 'white' : 'var(--text-secondary)'};cursor:pointer;">
+                style="padding:4px 12px;font-size:0.8125rem;border:1px solid ${state.filters.purpose.includes(opt.value) ? 'var(--accent)' : 'var(--border)'};border-radius:16px;background:${state.filters.purpose.includes(opt.value) ? 'var(--accent)' : 'transparent'};color:${state.filters.purpose.includes(opt.value) ? 'white' : 'var(--text-secondary)'};cursor:pointer;">
           ${opt.label}
         </button>
       `).join('')}
@@ -327,7 +327,10 @@ function renderFilterPanel() {
 }
 
 function toggleFilter(dimension, value) {
-  state.filters[dimension] = state.filters[dimension] === value ? '' : value;
+  const arr = state.filters[dimension];
+  const idx = arr.indexOf(value);
+  if (idx >= 0) arr.splice(idx, 1);
+  else arr.push(value);
   renderFilterTabs();
   renderMasonry();
 }
@@ -345,7 +348,7 @@ function toggleTag(btn) {
 }
 
 function clearAllFilters() {
-  state.filters = { style: '', season: '', purpose: '' };
+  state.filters = { style: [], season: [], purpose: [] };
   state.selectedTags = [];
   state.searchQuery = '';
   renderFilterTabs();
@@ -426,9 +429,16 @@ function getFilteredAssets() {
     );
   }
 
-  if (state.filters.style) filtered = filtered.filter(a => a.attributes?.style === state.filters.style);
-  if (state.filters.season) filtered = filtered.filter(a => a.attributes?.season === state.filters.season);
-  if (state.filters.purpose) filtered = filtered.filter(a => a.attributes?.purpose === state.filters.purpose);
+  ['style', 'season', 'purpose'].forEach(dim => {
+    const sel = state.filters[dim];
+    if (sel && sel.length > 0) {
+      filtered = filtered.filter(a => {
+        const v = a.attributes ? a.attributes[dim] : undefined;
+        const vals = Array.isArray(v) ? v : (v ? [v] : []);
+        return vals.some(x => sel.includes(x));
+      });
+    }
+  });
 
   if (state.selectedTags.length > 0) {
     filtered = filtered.filter(a => state.selectedTags.every(tag => a.tags?.includes(tag)));
