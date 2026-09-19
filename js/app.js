@@ -935,6 +935,7 @@ function openSettings() {
       <div class="modal__body">
         <button class="btn btn--primary" style="width:100%;margin-bottom:8px;" onclick="exportData()">📦 导出备份</button>
         <button class="btn btn--secondary" style="width:100%;margin-bottom:16px;" onclick="importBackup()">📥 导入备份</button>
+        <button class="btn btn--secondary" style="width:100%;margin-bottom:16px;" onclick="openAttrManager()">🏷️ 属性类别管理</button>
         <div id="storage-info" style="font-size:0.8125rem;color:var(--text-secondary);text-align:center;">加载中...</div>
       </div>
     </div>
@@ -1363,7 +1364,7 @@ async function openDetail(id) {
         ${(asset.tags || []).map(t => '<span class="masonry__tag">#' + esc(t) + '</span>').join('')}
       </div>
       <div style="margin-bottom:16px;">
-        <div style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:8px;">属性</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-size:0.8125rem;color:var(--text-secondary);">属性</span><button onclick="openAttrManager()" style="font-size:0.75rem;color:var(--accent);background:none;border:none;cursor:pointer;">管理类别</button></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <select onchange="updateAssetAttribute('${asset.id}', 'style', this.value)" style="padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);">
             <option value="">风格</option>
