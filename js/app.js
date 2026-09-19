@@ -251,6 +251,7 @@ function renderFilterTabs() {
 
 function toggleFilterPanel() {
   state.showFilterPanel = !state.showFilterPanel;
+  if (!state.showFilterPanel) { const fp = document.getElementById('filter-panel'); if (fp) fp.remove(); }
   renderFilterTabs();
   renderMasonry();
 }
@@ -884,6 +885,7 @@ function renderFavorites() {
 // ========== 视图切换 ==========
 async function switchView(view) {
   state.currentView = view;
+  if (view !== 'library') { state.showFilterPanel = false; const fp2 = document.getElementById('filter-panel'); if (fp2) fp2.remove(); }
 
   const searchBar = document.getElementById('search-bar');
   const filterTabs = document.getElementById('filter-tabs');
