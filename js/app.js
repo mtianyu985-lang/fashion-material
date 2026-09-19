@@ -948,7 +948,12 @@ function openSettings() {
   getStorageInfo().then(info => {
     const el = document.getElementById('storage-info');
     if (el) {
-      el.innerHTML = '<div>素材: ' + info.totalAssets + ' 张 | 回收站: ' + info.deletedAssets + ' 张</div><div>占用: ' + info.totalSizeMB + ' MB</div>';
+      const quotaMB = info.quota > 0 ? (info.quota / 1024 / 1024).toFixed(0) : '大量';
+      var pct = info.percent ? info.percent.toFixed(1) : 0;
+      el.innerHTML = '<div>素材: ' + info.totalAssets + ' 张 | 回收站: ' + info.deletedAssets + ' 张</div>' +
+        '<div style="margin:10px 0 4px;text-align:left;font-size:0.75rem;color:var(--text-secondary);">存储空间: ' + info.totalSizeMB + ' MB / ' + quotaMB + ' MB (' + pct + '%)</div>' +
+        '<div style="height:8px;background:var(--bg-primary);border-radius:4px;overflow:hidden;">' +
+        '<div style="height:100%;width:' + Math.min(100, pct) + '%;background:' + (pct >= 90 ? '#e5533b' : pct >= 70 ? '#e5a33b' : 'var(--accent)') + ';border-radius:4px;transition:width .3s;"></div></div>';
     }
   });
 }
@@ -957,6 +962,13 @@ async function getStorageInfo() {
   const assets = await db.getAllAssets();
   const deleted = await db.getDeletedAssets();
   let totalSize = 0;
+  let quota = 0;
+  if (typeof navigator !== 'undefined' && navigator.storage && navigator.storage.estimate) {
+    try {
+      const est = await navigator.storage.estimate();
+      quota = (est.quota && est.quota > 0) ? est.quota : 0;
+    } catch (e) {}
+  }
   for (const asset of [...assets, ...deleted]) {
     if (asset.thumb) totalSize += asset.thumb.length || 0;
     if (asset.dataUrl) totalSize += asset.dataUrl.length || 0;
@@ -968,6 +980,8 @@ async function getStorageInfo() {
     deletedAssets: deleted.length,
     totalSize,
     totalSizeMB: (totalSize / 1024 / 1024).toFixed(1),
+    quota,
+    percent: quota > 0 ? Math.min(100, (totalSize / quota) * 100) : 0,
   };
 }
 
