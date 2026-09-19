@@ -271,7 +271,7 @@ function renderFilterPanel() {
   if (existPanel) existPanel.remove();
   const panel = document.createElement('div');
   panel.id = 'filter-panel';
-  panel.style.cssText = 'padding:16px;background:var(--bg-card);border-bottom:1px solid var(--border);';
+  panel.style.cssText = 'position:fixed;left:0;right:0;top:calc(var(--header-height) + 48px + 40px);padding:16px;background:var(--bg-card);border-bottom:1px solid var(--border);z-index:97;box-shadow:0 2px 8px rgba(0,0,0,0.08);';
 
   const allTags = new Set();
   state.assets.forEach(a => (a.tags || []).forEach(t => allTags.add(t)));
