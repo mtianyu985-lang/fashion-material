@@ -2,7 +2,7 @@
    服装设计素材库 · Service Worker
    ============================================ */
 
-const CACHE_NAME = 'fashion-material-v6';
+const CACHE_NAME = 'fashion-material-v7';
 const STATIC_ASSETS = [
   './',
   './index.html',
